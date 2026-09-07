@@ -18,4 +18,5 @@ npm run install:all
 
 - `server/` — Express + LangGraph agent (Gemini) with Qdrant RAG search and live Chess.com tools
 - `client/` — React + Vite chat UI
+- `python/` — data pipeline: Chess.com fetchers, Qdrant ingestion, background scheduler
 - `server/.env.example` — required env vars (copy values into the repo-root `.env`)

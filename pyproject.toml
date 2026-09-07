@@ -1,5 +1,5 @@
 [project]
-name = "llm-zoomcamp"
+name = "chess-llm"
 version = "0.1.0"
 description = "Chess LLM - RAG system with Chess.com data"
 readme = "README.md"
@@ -22,9 +22,11 @@ dependencies = [
 ]
 
 [project.scripts]
-llm-zoomcamp = "llm_zoomcamp:main"
 chess-ingest = "python.main:main"
 
 [build-system]
-requires = ["uv_build>=0.12.8,<0.13.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+force-include = { "chess-llm/python" = "python" }
