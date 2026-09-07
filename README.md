@@ -2,7 +2,9 @@
 
 A chess-focused RAG assistant. Chat about players, openings, ratings, live streamers, and leaderboards — powered by **Gemini**, **Qdrant**, and live **Chess.com** data.
 
-<img src="chess-llm/client/public/logo.png" alt="Chess LLM logo" width="180">
+<p align="center">
+  <img src="chess-llm/client/public/logo.png" alt="Chess LLM logo" width="180">
+</p>
 
 ## Architecture
 
