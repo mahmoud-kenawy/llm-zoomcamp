@@ -63,42 +63,117 @@ Hybrid design — each runtime does what it's best at:
 └── .env                       # YOUR keys (gitignored, never commit)
 ```
 
-## Prerequisites
+## Dependencies
 
-- Node.js 18+ and npm
-- Python 3.12+ with `uv` (or pip)
-- A Gemini API key ([Google AI Studio](https://aistudio.google.com/)) — new keys serve 3.x models
-- A Qdrant Cloud cluster (or self-hosted) with an empty `chess-llm` collection
+### 1. Software you must install
 
-## Setup
+| Software | Version | Check with | Install |
+|----------|---------|------------|---------|
+| Node.js + npm | 18+ | `node --version` | https://nodejs.org/ |
+| Python | 3.12+ | `python3 --version` | https://www.python.org/ |
+| uv (Python package manager) | any | `uv --version` | https://docs.astral.sh/uv/ (or use `pip` instead) |
+| Git | any | `git --version` | https://git-scm.com/ |
+
+### 2. Free accounts & API keys
+
+| Service | Used for | Where to get it | Env vars |
+|---------|----------|-----------------|----------|
+| Google AI Studio (Gemini) | Chat (`gemini-3.5-flash-lite`) + embeddings (`gemini-embedding-001`) | https://aistudio.google.com/ | `GEMINI_API_KEY` |
+| Qdrant Cloud | Vector database (`chess-llm` collection, 3072-dim, Cosine) | https://cloud.qdrant.io/ | `QDRANT_URL`, `QDRANT_API_KEY`, `QDRANT_COLLECTION_NAME` |
+| LangSmith (optional) | Tracing/debugging | https://smith.langchain.com/ | `LANGSMITH_*` (see `chess-llm/server/.env.example`) |
+| Chess.com API | Player/streamer/leaderboard data — **no key needed**, public | — | — |
+
+### 3. Project packages (installed automatically)
+
+**Node.js** (`npm install --legacy-peer-deps` in `chess-llm/server` and `chess-llm/client`):
+`langchain`, `@langchain/core`, `@langchain/langgraph`, `@langchain/google-genai`,
+`@langchain/qdrant`, `@qdrant/js-client-rest`, `express`, `cors`, `dotenv`, `zod`,
+`multer`, `pdf-parse`, `react`, `react-dom`, `react-markdown`, `vite`
+
+**Python** (`uv sync` or `pip install -r requirements.txt` at repo root):
+`google-genai`, `langchain-google-genai`, `langchain-qdrant`, `qdrant-client`,
+`aiohttp`, `apscheduler`, `beautifulsoup4`, `python-dotenv`, `requests`
+
+## How to run this project
+
+### Step 0 — Environment file
+
+Create a `.env` file at the repo root (it is gitignored; both Python and Node read it —
+`chess-llm/server/.env` is a symlink to it):
+
+```env
+QDRANT_URL=https://xyz.us-east-1-1.aws.cloud.qdrant.io
+QDRANT_API_KEY=YOUR_QDRANT_API_KEY
+QDRANT_COLLECTION_NAME=chess-llm
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+```
+
+### Step 1 — Install everything
 
 ```bash
-# 1. Environment — copy and fill (root .env is shared by Python + Node)
-# Required: QDRANT_URL, QDRANT_API_KEY, QDRANT_COLLECTION_NAME=chess-llm,
-#           GEMINI_API_KEY, (optional LangSmith vars, see server/.env.example)
-
-# 2. Web app deps
+# Web app deps
 cd chess-llm/server && npm install --legacy-peer-deps
 cd ../client && npm install --legacy-peer-deps
 
-# 3. Python deps
+# Python deps
 cd /workspaces/llm-zoomcamp && uv sync   # or: pip install -r requirements.txt
 ```
 
-## Usage
+### Step 2 — Load chess data into Qdrant (one time)
 
 ```bash
-# 1. Bulk ingest chess knowledge into Qdrant (curated + Chess.com data)
+cd /workspaces/llm-zoomcamp
 python -m python.main --ingest --usernames hikaru magnuscarlsen
+```
 
-# 2. Continuous background updates (streamers 30m, leaderboards 2h, players daily)
+This embeds 91 curated docs (openings, concepts, famous games, champions) plus live
+Chess.com data, then upserts them into the `chess-llm` collection.
+Note: free-tier embedding quota is 1000 calls/day — the pipeline batches, throttles,
+and skips unchanged docs automatically.
+
+### Step 3 — Start background updates (optional, keeps data fresh)
+
+```bash
+cd /workspaces/llm-zoomcamp
 python -m python.main --scheduler &
+```
 
-# 3. Chat app (server :3001 + client :5173)
+Runs forever: streamers every 30 min, leaderboards every 2 h, top players daily at 3 AM.
+
+### Step 4 — Start the chat app
+
+```bash
 cd chess-llm && npm run dev
 ```
 
+| Service | URL |
+|---------|-----|
+| App (frontend) | http://localhost:5173 |
+| API (backend) | http://localhost:3001 |
+
+Or start each side separately in its own terminal:
+
+```bash
+# Terminal 1 — backend
+cd chess-llm/server && node index.js
+
+# Terminal 2 — frontend
+cd chess-llm/client && npm run dev
+```
+
+### Step 5 — Try it
+
 Try: *"Hikaru's blitz rating?"* · *"Who is streaming right now?"* · *"Explain the Sicilian Defense"* · *"Bullet leaderboard"*
+
+### Step 6 — Stop everything
+
+```bash
+# Kill backend + frontend (adjust PIDs from ps output if needed)
+pkill -f "node index.js"; pkill -f vite
+
+# Stop the Python scheduler (if started with &)
+pkill -f "python.main --scheduler"
+```
 
 ## How the agent handles usernames
 
