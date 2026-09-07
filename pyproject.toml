@@ -1,0 +1,30 @@
+[project]
+name = "llm-zoomcamp"
+version = "0.1.0"
+description = "Chess LLM - RAG system with Chess.com data"
+readme = "README.md"
+authors = [
+    { name = "Mahmoud Kenawy", email = "142327200+mahmoud-kenawy@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=1.4.0",
+    "langchain-openai>=1.6.0",
+    "langchain-google-genai>=2.0.0",
+    "langchain-qdrant>=0.1.0",
+    "qdrant-client>=1.15.0",
+    "google-genai>=1.0.0",
+    "aiohttp>=3.9.0",
+    "beautifulsoup4>=4.12.0",
+    "apscheduler>=3.10.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+llm-zoomcamp = "llm_zoomcamp:main"
+chess-ingest = "python.main:main"
+
+[build-system]
+requires = ["uv_build>=0.12.8,<0.13.0"]
+build-backend = "uv_build"

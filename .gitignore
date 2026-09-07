@@ -1,0 +1,26 @@
+# Secrets
+.env
+*.env
+!.env.example
+CHESS_LLM_IMPLEMENTATION_PLAN.md
+uv.lock
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+python/.ingest_hashes.json
+test.ipynb
+# Node
+node_modules/
+dist/
+*.log
+
+# Misc
+.DS_Store
+.vscode/
+
+# Unused images (app uses chess-llm/client/public/logo.png)
+/image.png
+chess-llm/client/public/vite.svg
+chess-llm/client/src/assets/react.svg

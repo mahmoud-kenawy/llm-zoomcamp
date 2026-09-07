@@ -1,0 +1,12 @@
+requests
+minsearch
+openai
+jupyter
+python-dotenv
+google-genai
+langchain-google-genai
+langchain-qdrant
+qdrant-client
+aiohttp
+beautifulsoup4
+apscheduler
